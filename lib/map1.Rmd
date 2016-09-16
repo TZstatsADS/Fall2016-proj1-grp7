@@ -25,8 +25,8 @@ library(plotly)
 
 #### Load data and select variables:
 ```{r load data, message=FALSE}
- selected.variables = c("PUMA", "ST", "POBP", "FPOBP", "PWGTP")
-# "WAOB", "ENG","LANX", "SCHL", "YOEP", "DECADE", "HISP", "LANP", "MIGSP", "NATIVITY", "NOP", "WGTP", paste0("wgtp", 1:80))
+ selected.variables = c("ST", "POBP", "FPOBP", "PWGTP", "NATIVITY")
+# "WAOB", "ENG","LANX", "SCHL", "YOEP", "DECADE", "HISP", "LANP", "MIGSP", "NOP", "WGTP", paste0("wgtp", 1:80))
 
  hus.a.data = fread("../data/ss14pusa.csv", select = selected.variables)
  hus.b.data = fread("../data/ss14pusb.csv", select = selected.variables)
@@ -34,7 +34,7 @@ library(plotly)
  db = rbind(hus.a.data, hus.b.data)
  rm(hus.a.data, hus.b.data)
 
-# load("../data/db.RData")
+ # load("../data/db.RData")
 
 ```
 \
@@ -45,14 +45,15 @@ library(plotly)
 
 ```{r, message=FALSE}
 countries = fread("../data/countrynames.csv")
-db = left_join(db, countries, by = c("POBP" = "code"))
-db = mutate(db, COB_name = name)
-db = select(db, -name)
+db = db %>% 
+    left_join(., countries, by = c("POBP" = "code")) %>%
+    rename(COB_name = name)
 
 states = fread("../data/statenames.csv")
-db = left_join(db, states, by = c("ST" = "code"))
-db = mutate(db, ST_abbr = abbr)
-db = select(db, -c(name, abbr))
+db = db %>% 
+    left_join(., states, by = c("ST" = "code")) %>% 
+    rename(ST_abbr = abbr) %>% 
+    select(-c(name))
 
 statenames = states$name
 
@@ -68,7 +69,7 @@ statenames = statenames[!statenames %in% c('District of Columbia','Puerto Rico')
 ```{r, message=FALSE}
 pop_total = db %>% group_by(ST_abbr) %>% summarise(sum(PWGTP)) %>% rename(tot = `sum(PWGTP)`)
 pct_imm_by_st = db %>% 
-              filter(POBP>=100) %>% 
+              filter(NATIVITY==2) %>% 
               group_by(ST_abbr) %>% 
               summarise(sum(PWGTP)) %>% 
               mutate(percent_imm = round(100*`sum(PWGTP)`/pop_total$tot, 1)) %>%
@@ -85,7 +86,7 @@ pct_imm_by_st = db %>%
 top_n = 5 # the top how many countries of immigration to display
 top_countries = list()
 for(s in unique(db$ST_abbr)){
-  state_rows = filter(db, ST_abbr==s & POBP>=100) # select only immigrants in state s
+  state_rows = filter(db, ST_abbr==s & NATIVITY==2) # select only immigrants in state s
   top_countries[[s]] = state_rows %>%
                       group_by(COB_name) %>%
                       summarise(sum(PWGTP)) %>%
