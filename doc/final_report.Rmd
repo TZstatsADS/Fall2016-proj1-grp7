@@ -1,0 +1,269 @@
+---
+title: "Study of the foreign-born population in the United States"
+output:
+  html_document: default
+  html_notebook: default
+  pdf_document: default
+---
+
+\
+\
+
+
+```{r libraries, message=FALSE, include=FALSE}
+# Load libraries:
+library(dplyr)
+library(data.table)
+library(DT)
+library(ggplot2)
+library(plotly)
+```
+
+
+```{r load data, message=FALSE, include=FALSE}
+# Load data and select variables:
+ selected.variables = c("ST","POBP","ENG","SCHL", "NATIVITY", "YOEP", "AGEP", "PWGTP")
+ hus.a.data = fread("../data/ss14pusa.csv", select = selected.variables)
+ hus.b.data = fread("../data/ss14pusb.csv", select = selected.variables)
+ db = rbind(hus.a.data, hus.b.data)
+ rm(hus.a.data, hus.b.data)
+
+ # load("../data/db.RData")
+```
+
+
+
+```{r, message=FALSE, include=FALSE}
+# Get country names and state abbreviations:
+
+countries = fread("../data/countrynames.csv")
+db = db %>% 
+    left_join(., countries, by = c("POBP" = "code")) %>%
+    rename(COB_name = name)
+
+states = fread("../data/statenames.csv")
+db = db %>% 
+    left_join(., states, by = c("ST" = "code")) %>% 
+    rename(ST_abbr = abbr) %>% 
+    select(-c(name))
+
+statenames = states$name
+
+# remove DC and Puerto Rico rows:
+db = filter(db, !ST_abbr %in% c('DC','PR'))
+statenames = statenames[!statenames %in% c('District of Columbia','Puerto Rico')]
+```
+
+
+```{r, message=FALSE, include=FALSE}
+# Find top countries of immigration:
+top_n = 20 # the top how many countries of immigration
+top_countries = db %>% 
+                filter(NATIVITY==2) %>%
+                group_by(COB_name) %>%
+                summarise(sum(PWGTP)) %>%
+                arrange(desc(`sum(PWGTP)`)) %>%
+                head(top_n)
+```
+
+
+### Top `r top_n` countries of origin for immigrants in the United States:
+
+| Rank |   |Country | Immigrant Population|
+|------|---|--------|---------------------|
+`r paste('|', 1:top_n, '|', paste('![](../data/flags/24/',top_countries[[1]],'.png)', sep=''), '|', top_countries[[1]], '|', round(top_countries[[2]]/1e6, 3), 'M', '|', '\n', collapse='')`
+
+
+
+```{r, message=FALSE, include=FALSE}
+# Estimate percent immigrant in state poulation:
+
+pop_total = db %>% group_by(ST_abbr) %>% summarise(sum(PWGTP)) %>% rename(tot = `sum(PWGTP)`)
+pct_imm_by_st = db %>% 
+              filter(NATIVITY==2) %>% 
+              group_by(ST_abbr) %>% 
+              summarise(sum(PWGTP)) %>% 
+              mutate(percent_imm = round(100*`sum(PWGTP)`/pop_total$tot, 1)) %>%
+              select(-`sum(PWGTP)`)
+
+```
+
+
+
+```{r, message=FALSE, include=FALSE}
+# For each US state, get top countries of immigration:
+top_n_st = 5 # the top how many countries of immigration to display
+top_countries = list()
+for(s in unique(db$ST_abbr)){
+  state_rows = filter(db, ST_abbr==s & NATIVITY==2) # select only immigrants in state s
+  top_countries[[s]] = state_rows %>%
+                      group_by(COB_name) %>%
+                      summarise(sum(PWGTP)) %>%
+                      mutate(pct = round(100* `sum(PWGTP)` /sum(state_rows$PWGTP), 1)) %>%
+                      select(-`sum(PWGTP)`) %>%
+                      arrange(desc(pct)) %>%
+                      head(top_n_st)
+}
+```
+\
+\
+
+
+### Geographic distribution of immigrant groups:
+\
+\
+```{r, message=FALSE, echo=FALSE}
+# Display map:
+
+nstates = length(top_countries)
+hover = character(nstates)
+
+# prepare list for display of top countries of immigration:
+for(i in 1:nstates){
+  hover[i] = paste('<b>', statenames[i], ' ', pct_imm_by_st$percent_imm[i], '%</b>, of which:<br>',
+                    paste('  ',top_countries[[i]]$COB_name, ' ', top_countries[[i]]$pct, '% <br>', collapse=""),
+                    collapse="")
+}
+
+# include in data frame along with other vars for plotting
+state_imm = data.frame(hover = hover, code = unique(db$ST_abbr), stringsAsFactors=FALSE)
+state_imm = left_join(state_imm, pct_imm_by_st, by = c('code'='ST_abbr'))
+
+
+# give state boundaries a white border
+l = list(color = toRGB("white"), width = 2)
+
+# specify some map projection/options
+g = list(scope = 'usa', projection = list(type = 'albers usa'), showlakes = TRUE, lakecolor = toRGB('white'))
+
+plot_ly(state_imm, type = 'choropleth', z = percent_imm, 
+        locationmode = 'USA-states', locations = code, 
+        hoverinfo = 'text', text = hover, 
+        color = percent_imm, colors = 'Oranges',
+        marker = list(line = l), 
+        colorbar = list(len = 0.75, thickness = 20, title = "Percent foreign-born")) %>%
+  
+  layout(geo = g, 
+         title = 'Percent foreign-born per state and top countries of origin <br> (hover cursor over map for breakdown)', 
+         autosize = FALSE,
+         width = 900,
+         margin = list(t=25, l=0, r=0, d=0))
+
+```
+
+
+### Age, Year of entry and Age of arrival of different immigrant groups:
+
+```{r, message=FALSE, include=FALSE}
+# Compute weighed densities of Age, Year of Entry, and Age at Entry for different immigrant groups. Weighing is done using survey weights PWGTP
+
+select_countries = c('Mexico', 'China', 'Cuba', 'India', 'Germany') # top_countries$COB_name
+plot_data = filter(db, NATIVITY==2 & COB_name %in% select_countries)
+
+ages = integer()
+yoes = integer()
+aoas = integer()
+education = integer()
+age_freqs = numeric()
+yoe_freqs = numeric()
+aoa_freqs = numeric()
+edu_freqs = numeric()
+countries = character()
+
+
+for(country in select_countries){
+  plot_data_c = filter(plot_data, COB_name==country)
+  
+  #weighted density of education levels
+  plot_data_c = filter(plot_data_c, !is.na(SCHL))
+  dens_c = with(plot_data_c, density(SCHL, weights = PWGTP/sum(PWGTP), n = 100, from = 0, to = 25))
+  education = c(education, dens_c[[1]])
+  edu_freqs = c(edu_freqs, dens_c[[2]])
+  
+  # weighed density of ages
+  dens_c = with(plot_data_c, density(AGEP, weights=PWGTP/sum(PWGTP), bw=4, n=100, from=0, to=100))
+  ages = c(ages, dens_c[[1]])
+  age_freqs = c(age_freqs, dens_c[[2]])
+  
+  # weighed density of year of entry
+  dens_c = with(plot_data_c, density(YOEP, weights=PWGTP/sum(PWGTP), bw=3, n=100, from=1920, to=2020))
+  yoes = c(yoes, dens_c[[1]])
+  yoe_freqs = c(yoe_freqs, dens_c[[2]])
+  
+  # weighed density age at entry
+  dens_c = with(plot_data_c, density(AGEP-(2014-YOEP), weights=PWGTP/sum(PWGTP), bw=3, n=100, from=-10, to=100))
+  aoas = c(aoas, dens_c[[1]])
+  aoa_freqs = c(aoa_freqs, dens_c[[2]])
+  
+  countries = c(countries, rep(country,100))
+}
+
+# data frame for plotting:
+density_data = data.frame(age = ages, yoe = yoes, aoa = aoas, edu = education,
+                          age_freq = age_freqs, yoe_freq = yoe_freqs, aoa_freq = aoa_freqs,
+                          edu_freqs = edu_freqs, country = countries)
+```
+
+
+We show the age distributions of five important immigrant groups: Mexico, China, Cuba, India and Germany. These densities were computed by weghing observations using the survey weights PWGTP.
+
+```{r, warning=FALSE, echo=FALSE}
+
+# age distributions:
+ggplot(density_data, aes(age, age_freq, color=country)) + 
+  geom_line() +
+  theme_bw() + 
+  labs(title='Age distribution per immigrant group', x='Age', y='Frequency', color='Country') +
+  scale_x_continuous(breaks=seq(0,100,10))
+```
+\
+We notice that German immigrants tend to be significantly older than other groups, with a most likely age of about 70 years old. Cuban foreign-born residents are the second oldest group, with a typical age of about 50. In constrast, the bulk of Mexican and Indian immigrants tends to be in their thirties. Interestingly, the Chinese foreign-born population appears to have a bimodal distribution, with most idividuals either in their mid-twenties or in their forties. \
+These age differences might be explained by the year in which each group entered the United States. We look at this next.
+\
+\
+
+ 
+```{r, warning=FALSE, echo=FALSE}
+# year of entry distributions:
+ggplot(density_data, aes(yoe, yoe_freq, color=country)) + 
+  geom_line() +
+  theme_bw() + 
+  labs(title='Frequency of year of entry per immigrant group', x='Year of entry', y='Frequency', color='Country') +
+  xlim(c(1920,2010)) +
+  annotate("text", x=1957, y=0.027, label='Post-WWII') +
+  annotate("text", x=1967, y=0.018, label='Cuban Rev.') 
+```
+\
+As suggested by the age distributions, we see that the large majority of the German group arrived in the coutry the earliest, in the two decades following World War II. The Cuban group followed, most likely pushed to exile by the revolution of 1953-59. We also see that the Mexican wave of immigration seems to have peaked around 2000, whereas Chinese and Indian immigration appears to not yet have reached its peak.\
+Finally, we look at the distribution of the age of arrival, computed by subtracting the years since arrival (2014 - year-of-entry) to the current age.
+\
+\
+
+
+```{r, warning=FALSE, echo=FALSE}
+# age at entry distributions:
+ggplot(density_data, aes(aoa, aoa_freq, color=country)) + 
+  geom_line() +
+  theme_bw() + 
+  labs(title='Distribution of age of arrival per immigrant group', x='Age of arrival', y='Frequency', color='Country') +
+  xlim(c(0,75)) 
+ 
+```
+\
+We see a general trend in most groups to immigrate to the country in their twenties. There is also evidence of a smaller mode at 0-10 years of age for most distributions, which suggests that a lot of foreign-born residents entered the country as small children.
+\
+\
+\
+
+
+Now let get to Education
+```{r, echo = FALSE}
+ggplot(density_data, aes(edu, edu_freqs, color=country)) +
+  geom_line() +
+  theme_bw() +
+  labs(title='Education distribution per immigrant group', x='Education', y='Frequency', color='Country')  +
+  scale_x_continuous(labels = c('No School Completed','Grade 2','Grade 7','12th Grade','Associate degree','Doctorate degree')) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.7))
+```
+
+
