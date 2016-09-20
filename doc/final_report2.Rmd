@@ -260,7 +260,7 @@ We see a general trend in most groups to immigrate to the country in their twent
 Firstly choose the varaibles we are intersted in: 
 After comparing the variables, we chose Class of Worker(COW),Employment Status Record(ESR) and Industry Field Record (INDP) as three attributes to evalute the employment situations of the immigrants in the U.S.
 
-```
+```{r, echo=FALSE}
 #Load data and select variables:
 selected.variables = c("ST","SCHL", "NATIVITY","PWGTP","INDP","SOCP","COW","ESR","POBP","POVPIP","WAGP","FINCP","HINCP","FFINCP","FHINCP","OIP")
 hus.a.data = fread("~/Desktop/ss14pusa.csv", select = selected.variables)
@@ -279,7 +279,7 @@ db = db %>%
 
 \\Then choose the countries we are interested in:
 
-```
+```{r, echo=FALSE}
 # Find top countries of immigration:
 top_n = 20 # the top how many countries of immigration
 top_countries = db %>% 
@@ -293,11 +293,11 @@ top_countries = db %>%
 \\
  From the above picture, we can see that these are the top 20 countries migrant to the U.S. I picked Mexico, China, Cuba, Canada and Germany. As they are in South America, Asia, Middle America, North America and Europe, I think these five countries are representative. So I chose them as the our goals.
  
- ```
+ ```{r, echo=FALSE}
 select_countries = c('Mexico','China', 'Cuba', 'Canada', 'Germany') # top_countries$COB_name
 plot_data = filter(db, NATIVITY==2 & COB_name %in% select_countries)
 
- ```
+ ```{r, echo=FALSE}
  ```
  #bar chart about class of worker in the typical countries, use the variable COW
 species = c(rep("Mexico",10),rep("China",10),rep("Cuba",10),rep("Canada",10),rep("Germany",10))
@@ -322,7 +322,7 @@ p + geom_bar(position="dodge", stat="identity") + labs(title='Class of worker', 
 ```
 \\From the above Class of Workers graph, we may conclude that Mexico has significant high level of people who immigrate to the U.S working for wages. An interesting result also show that Germany has the most immigrants to who work in the U.S.for self-employed in their own but not incorporated companies.
 
-```
+```{r, echo=FALSE}
 #bar chart about the Employment status recode, using the variable ESR
 under16 = vector()
 for ( i in 1:5){
@@ -340,7 +340,7 @@ p + geom_bar(position="dodge", stat="identity") + labs(title='Employment Status 
 
 \\As we can see from the employment status recode graph, Mexican people surplus other countries of the total immigrants to the U.S. The civilian employed at work and not in labor force also take a large percentage. Chins ranks second and the other three countries all have the similar patterns, showing that people who are civilian employed and at work and not in labor force are the main status of the migrants in the U.S.
 
-```
+```{r, echo=FALSE}
 #bar chart about Industry recode using the variable INDP
 #classify industry through INDP fisrt three letters
 AGR = c(170,180,190,270,280,290)
