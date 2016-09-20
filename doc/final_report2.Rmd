@@ -277,7 +277,8 @@ db = db %>%
 ```
   
 
-Then choose the countries we are interested in:
+\\\Then choose the countries we are interested in:
+
 ```
 # Find top countries of immigration:
 top_n = 20 # the top how many countries of immigration
