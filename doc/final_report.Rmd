@@ -17,18 +17,19 @@ library(data.table)
 library(DT)
 library(ggplot2)
 library(plotly)
+library(scatterD3)
 ```
 
 
 ```{r load data, message=FALSE, include=FALSE}
 # Load data and select variables:
- selected.variables = c("ST","POBP","ENG","SCHL", "NATIVITY", "YOEP", "AGEP", "PWGTP")
- hus.a.data = fread("../data/ss14pusa.csv", select = selected.variables)
- hus.b.data = fread("../data/ss14pusb.csv", select = selected.variables)
- db = rbind(hus.a.data, hus.b.data)
- rm(hus.a.data, hus.b.data)
-
- # load("../data/db.RData")
+ #selected.variables = c("ST","POBP","ENG","SCHL", "NATIVITY", "YOEP", "AGEP", "PWGTP")
+ #hus.a.data = fread("../data/ss14pusa.csv", select = selected.variables)
+ #hus.b.data = fread("../data/ss14pusb.csv", select = selected.variables)
+ #db = rbind(hus.a.data, hus.b.data)
+ #rm(hus.a.data, hus.b.data)
+ #save(db, file = "../data/db.RData")
+  load("../data/db.RData")
 ```
 
 
@@ -163,22 +164,14 @@ plot_data = filter(db, NATIVITY==2 & COB_name %in% select_countries)
 ages = integer()
 yoes = integer()
 aoas = integer()
-education = integer()
 age_freqs = numeric()
 yoe_freqs = numeric()
 aoa_freqs = numeric()
-edu_freqs = numeric()
 countries = character()
 
 
 for(country in select_countries){
   plot_data_c = filter(plot_data, COB_name==country)
-  
-  #weighted density of education levels
-  plot_data_c = filter(plot_data_c, !is.na(SCHL))
-  dens_c = with(plot_data_c, density(SCHL, weights = PWGTP/sum(PWGTP), n = 100, from = 0, to = 25))
-  education = c(education, dens_c[[1]])
-  edu_freqs = c(edu_freqs, dens_c[[2]])
   
   # weighed density of ages
   dens_c = with(plot_data_c, density(AGEP, weights=PWGTP/sum(PWGTP), bw=4, n=100, from=0, to=100))
@@ -199,9 +192,8 @@ for(country in select_countries){
 }
 
 # data frame for plotting:
-density_data = data.frame(age = ages, yoe = yoes, aoa = aoas, edu = education,
-                          age_freq = age_freqs, yoe_freq = yoe_freqs, aoa_freq = aoa_freqs,
-                          edu_freqs = edu_freqs, country = countries)
+density_data = data.frame(age = ages, yoe = yoes, aoa = aoas, age_freq = age_freqs, 
+                          yoe_freq = yoe_freqs, aoa_freq = aoa_freqs, country = countries)
 ```
 
 
@@ -251,19 +243,10 @@ ggplot(density_data, aes(aoa, aoa_freq, color=country)) +
 ```
 \
 We see a general trend in most groups to immigrate to the country in their twenties. There is also evidence of a smaller mode at 0-10 years of age for most distributions, which suggests that a lot of foreign-born residents entered the country as small children.
-\
-\
-\
 
 
-Now let get to Education
-```{r, echo = FALSE}
-ggplot(density_data, aes(edu, edu_freqs, color=country)) +
-  geom_line() +
-  theme_bw() +
-  labs(title='Education distribution per immigrant group', x='Education', y='Frequency', color='Country')  +
-  scale_x_continuous(labels = c('No School Completed','Grade 2','Grade 7','12th Grade','Associate degree','Doctorate degree')) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 0.7))
-```
+### Now, let's move on and take a look at the education level
+\
+
 
 
