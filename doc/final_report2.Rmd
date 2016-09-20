@@ -259,7 +259,7 @@ We see a general trend in most groups to immigrate to the country in their twent
 ###Let's take a look at the employment status of the migrations in the U.S.
 Firstly choose the varaibles we are intersted in: 
 After comparing the variables, we chose Class of Worker(COW),Employment Status Record(ESR) and Industry Field Record (INDP) as three attributes to evalute the employment situations of the immigrants in the U.S.
-\
+
 ```
 #Load data and select variables:
 selected.variables = c("ST","SCHL", "NATIVITY","PWGTP","INDP","SOCP","COW","ESR","POBP","POVPIP","WAGP","FINCP","HINCP","FFINCP","FHINCP","OIP")
