@@ -127,7 +127,7 @@ for (i in 1:5){
   less_than_16_INPD[i]=sum(is.na(filter(plot_data,COB_name == select_countries[i])$INDP))
 }
 total_num_mat = cbind(less_than_16_INPD,num_mat)
-total_num_val = matrix(total_num_mat,nrow = 1,byrow = TRUE)
+total_num_val = matrix(t(total_num_mat),nrow = 1,byrow = TRUE)
 species_INDP = c(rep("Mexico",20),rep("China",20),rep("Cuba",20),rep("Canada",20),rep("Germany",20))
 conditions_INDP = rep(c("under 16","AGR","EXT","UTL","CON","MFG","WHL","RET","TRN","INF","FIN","PRF","EDU","MED","SCA","ENT","SRV","ADM","MIL","UNEMPLYED"),5)
 data_INDP = data.frame(species_INDP,conditions_INDP,total_num_val)
