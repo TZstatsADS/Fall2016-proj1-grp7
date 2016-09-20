@@ -3,17 +3,20 @@
 
 Term: Fall 2016
 
-+ Team #
-+ Projec title: Lorem ipsum dolor sit amet
++ Team #7
++ Projec title: Study of the foreign-born population in the United States
 + Team members
-	+ team member 1
-	+ team member 2
-	+ team member 3
-	+ team member 4
-	+ team member 5
-+ Project summary: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-	
-**Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement. 
+	+ Zhehao Liu
+	+ Alex Saez
+	+ Jiani Tian
+	+ Wenjing Zhou
++ Project summary: Here we conduct a brief study of the foreign-born population in the United States based on the American Community Survey (ACS) published by the Census Bureau. We use the person-level data published for 2014, which includes 3,134,610 individuals. We focus on the foreign-born population, which consists of 360,677 individuals.
+\
+
+#### [See report (R notebook)](doc/final_report.Rmd)
+
+
+**Contribution statement**: AS is responsible for the list of the top 20 countries of origin, the interactive map of the US and the distributions of age, year of entry and age of arrival. ZL is resposible for the analysis of education level vs. country of origin [...to be continued...]. All team members approve our work presented in this GitHub repository including this contributions statement. 
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
 
@@ -25,6 +28,5 @@ proj/
 ├── figs/
 └── output/
 ```
-
 Please see each subfolder for a README file.
 
