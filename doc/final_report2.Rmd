@@ -258,7 +258,7 @@ We see a general trend in most groups to immigrate to the country in their twent
 \
 ###Let's take a look at the employment status of the migrations in the U.S.
 Firstly to choose the varaibles we are intersted in: 
-\
+\\
 \
 After comparing several similiar variables, we chose Class of Worker(COW),Employment Status Record(ESR) and Industry Field Record (INDP) as three attributes to evalute the employment situations of the immigrants in the U.S.
 \
