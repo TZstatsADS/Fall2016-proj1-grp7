@@ -5,7 +5,12 @@ output:
   html_notebook: default
   pdf_document: default
 ---
+\
+\
+\
 
+
+ **Here we conduct  a brief study of the foreign-born population in the United States based on the American Community Survey (ACS) published by the Census Bureau. We use the person-level data published for 2014, which includes 3,134,610 individuals. We focus on the foreign-born population, identified using the "NATIVITY" variable in the data, which consists of 360,677 individuals.** 
 \
 \
 
@@ -21,14 +26,14 @@ library(plotly)
 
 
 ```{r load data, message=FALSE, include=FALSE}
-# Load data and select variables:
- selected.variables = c("ST","POBP","ENG","SCHL", "NATIVITY", "YOEP", "AGEP", "PWGTP")
- hus.a.data = fread("../data/ss14pusa.csv", select = selected.variables)
- hus.b.data = fread("../data/ss14pusb.csv", select = selected.variables)
- db = rbind(hus.a.data, hus.b.data)
- rm(hus.a.data, hus.b.data)
+# # Load data and select variables:
+#  selected.variables = c("ST","POBP","ENG","SCHL", "NATIVITY", "YOEP", "AGEP", "PWGTP")
+#  hus.a.data = fread("../data/ss14pusa.csv", select = selected.variables)
+#  hus.b.data = fread("../data/ss14pusb.csv", select = selected.variables)
+#  db = rbind(hus.a.data, hus.b.data)
+#  rm(hus.a.data, hus.b.data)
 
- # load("../data/db.RData")
+ load("../data/db.RData")
 ```
 
 
@@ -71,8 +76,8 @@ top_countries = db %>%
 
 | Rank |   |Country | Immigrant Population|
 |------|---|--------|---------------------|
-`r paste('|', 1:top_n, '|', paste('![](../data/flags/24/',top_countries[[1]],'.png)', sep=''), '|', top_countries[[1]], '|', round(top_countries[[2]]/1e6, 3), 'M', '|', '\n', collapse='')`
-
+`r paste('|', 1:top_n, '|', paste('![](../data/Flags/24/',top_countries[[1]],'.png)', sep=''), '|', top_countries[[1]], '|', round(top_countries[[2]]/1e6, 3), 'M', '|', '\n', collapse='')`
+###### (Icons: <http://www.icondrawer.com>)
 
 
 ```{r, message=FALSE, include=FALSE}
@@ -205,9 +210,9 @@ density_data = data.frame(age = ages, yoe = yoes, aoa = aoas, edu = education,
 ```
 
 
-We show the age distributions of five important immigrant groups: Mexico, China, Cuba, India and Germany. These densities were computed by weghing observations using the survey weights PWGTP.
+We show the age distributions of five important immigrant groups (although not the five largest): Mexico, China, Cuba, India and Germany. These densities take into consideration the survey weights assigned to each observation.
 
-```{r, warning=FALSE, echo=FALSE}
+```{r, warning=FALSE, echo=FALSE, fig.height=4, fig.align='center'}
 
 # age distributions:
 ggplot(density_data, aes(age, age_freq, color=country)) + 
@@ -223,7 +228,7 @@ These age differences might be explained by the year in which each group entered
 \
 
  
-```{r, warning=FALSE, echo=FALSE}
+```{r, warning=FALSE, echo=FALSE, fig.height=4, fig.align='center'}
 # year of entry distributions:
 ggplot(density_data, aes(yoe, yoe_freq, color=country)) + 
   geom_line() +
@@ -240,7 +245,7 @@ Finally, we look at the distribution of the age of arrival, computed by subtract
 \
 
 
-```{r, warning=FALSE, echo=FALSE}
+```{r, warning=FALSE, echo=FALSE, fig.height=4, fig.align='center'}
 # age at entry distributions:
 ggplot(density_data, aes(aoa, aoa_freq, color=country)) + 
   geom_line() +
