@@ -403,7 +403,7 @@ p+geom_bar(position = "dodge",stat = "identity")+labs(title="Industry fields rec
 \
 From this industry record graph, we know that the teenagers take the most percentage in all five countries. Mexicans also take a large percentage in finance, manufacturing as well as United Telecoms Limited industrial areas.
 
-  ###Now let's have a look at the immigrations' income status.
+###Now let's have a look at the immigrations' income status.
  
  
 
