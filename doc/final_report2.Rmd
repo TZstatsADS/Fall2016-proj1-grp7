@@ -256,9 +256,10 @@ We see a general trend in most groups to immigrate to the country in their twent
 
 
 \
-###Let's take a look at the employment status of the migrations in the U.S.
-Firstly choose the varaibles we are intersted in: 
-After comparing the variables, we chose Class of Worker(COW),Employment Status Record(ESR) and Industry Field Record (INDP) as three attributes to evalute the employment situations of the immigrants in the U.S.
+  ###Let's take a look at the employment status of the migrations in the U.S.
+Firstly to choose the varaibles we are intersted in: 
+\
+After comparing several similiar variables, we chose Class of Worker(COW),Employment Status Record(ESR) and Industry Field Record (INDP) as three attributes to evalute the employment situations of the immigrants in the U.S.
 
 ```{r, echo=FALSE}
 #Load data and select variables:
@@ -277,7 +278,8 @@ db = db %>%
 ```
   
 
-\\Then choose the countries we are interested in:
+\
+Then choose the countries we are interested in:
 
 ```{r, echo=FALSE}
 # Find top countries of immigration:
@@ -290,15 +292,15 @@ top_countries = db %>%
   head(top_n)
   
 ```
-\\
+\
  From the above picture, we can see that these are the top 20 countries migrant to the U.S. I picked Mexico, China, Cuba, Canada and Germany. As they are in South America, Asia, Middle America, North America and Europe, I think these five countries are representative. So I chose them as the our goals.
  
  ```{r, echo=FALSE}
 select_countries = c('Mexico','China', 'Cuba', 'Canada', 'Germany') # top_countries$COB_name
 plot_data = filter(db, NATIVITY==2 & COB_name %in% select_countries)
 
- ```{r, echo=FALSE}
  ```
+ ```{r, echo=FALSE}
  #bar chart about class of worker in the typical countries, use the variable COW
 species = c(rep("Mexico",10),rep("China",10),rep("Cuba",10),rep("Canada",10),rep("Germany",10))
 conditions = rep(c("for wages","none-profit","local government","state government","fedral government","Self-employed in own not incorporated","Self-employed in own incorporated","Working without pay(family business or farm)","unemployed","less than 16"),5)
@@ -320,7 +322,8 @@ data = data.frame(species,conditions,values)
 p <- ggplot(data, aes(fill=conditions, y=values, x=species))
 p + geom_bar(position="dodge", stat="identity") + labs(title='Class of worker', x='Countries', y='Values', fill='Class')
 ```
-\\From the above Class of Workers graph, we may conclude that Mexico has significant high level of people who immigrate to the U.S working for wages. An interesting result also show that Germany has the most immigrants to who work in the U.S.for self-employed in their own but not incorporated companies.
+\
+From the above Class of Workers graph, we may conclude that Mexico has significant high level of people who immigrate to the U.S working for wages. An interesting result also shows that Germany has the most immigrants to who work in the U.S.for self-employed in their own but not incorporated companies.
 
 ```{r, echo=FALSE}
 #bar chart about the Employment status recode, using the variable ESR
@@ -338,7 +341,8 @@ p + geom_bar(position="dodge", stat="identity") + labs(title='Employment Status 
 
 ```
 
-\\As we can see from the employment status recode graph, Mexican people surplus other countries of the total immigrants to the U.S. The civilian employed at work and not in labor force also take a large percentage. Chins ranks second and the other three countries all have the similar patterns, showing that people who are civilian employed and at work and not in labor force are the main status of the migrants in the U.S.
+\
+As we can see from the employment status recode graph, Mexican people surplus other countries of the total immigrants to the U.S. The civilian employed at work and not in labor force also take a large percentage. Chins ranks second and the other three countries all have the similar patterns, showing that people who are civilian employed and at work and not in labor force are the main status of the migrants in the U.S.
 
 ```{r, echo=FALSE}
 #bar chart about Industry recode using the variable INDP
@@ -395,9 +399,10 @@ data_INDP = data.frame(species_INDP,conditions_INDP,total_num_val)
 p<-ggplot(data_INDP,aes(fill=conditions_INDP,y=total_num_val,x=species_INDP))
 p+geom_bar(position = "dodge",stat = "identity")+labs(title="Industry fields record in different countries")
 ```
-\From this industry record graph, we know that the teenagers take the most percentage in all five countries. Mexicans also take a large percentage in finance, manufacturing as well as United Telecoms Limited industrial areas.
+\
+From this industry record graph, we know that the teenagers take the most percentage in all five countries. Mexicans also take a large percentage in finance, manufacturing as well as United Telecoms Limited industrial areas.
 
-\ Now let's have a look at the immigrations' income status.
+  ###Now let's have a look at the immigrations' income status.
  
  
 
