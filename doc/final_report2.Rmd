@@ -395,7 +395,9 @@ data_INDP = data.frame(species_INDP,conditions_INDP,total_num_val)
 p<-ggplot(data_INDP,aes(fill=conditions_INDP,y=total_num_val,x=species_INDP))
 p+geom_bar(position = "dodge",stat = "identity")+labs(title="Industry fields record in different countries")
 ```
-\\From this industry record graph, we know that the teenagers take the most percentage in all five countries. Mexicans also take a large percentage in finance, manufacturing as well as United Telecoms Limited industrial areas.
+\From this industry record graph, we know that the teenagers take the most percentage in all five countries. Mexicans also take a large percentage in finance, manufacturing as well as United Telecoms Limited industrial areas.
+
+\ Now let's have a look at the immigrations' income status.
  
  
 
