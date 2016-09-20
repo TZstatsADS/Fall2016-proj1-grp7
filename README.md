@@ -3,8 +3,8 @@
 
 Term: Fall 2016
 
-+ Team #
-+ Projec title: Lorem ipsum dolor sit amet
++ Team #7
++ Projec title: Study of the foreign-born population in the United States
 + Team members
 	+ team member 1
 	+ team member 2
