@@ -16,18 +16,17 @@ Term: Fall 2016
 #### [See report (R notebook)](doc/final_report.Rmd)
 
 
-**Contribution statement**: AS is responsible for the list of the top 20 countries of origin, the interactive map of the US and the distributions of age, year of entry and age of arrival. ZL is resposible for the analysis of education level vs. country of aorigin [...to be continued...]. All team members approve our work presented in this GitHub repository including this contributions statement. 
+**Contribution statement**: AS is responsible for the list of the top 20 countries of origin, the interactive map of the US and the distributions of age, year of entry and age of arrival. ZL is resposible for the analysis of education level vs. country of origin [...to be continued...]. All team members approve our work presented in this GitHub repository including this contributions statement. 
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
 
 ```
 proj/
-????????? lib/
-????????? data/
-????????? doc/
-????????? figs/
-????????? output/
+├── lib/
+├── data/
+├── doc/
+├── figs/
+└── output/
 ```
-
 Please see each subfolder for a README file.
 
