@@ -29,15 +29,16 @@ library(gridExtra)
 
 
 ```{r, message=FALSE, include=FALSE}
-# Load data and select variables:
-# selected.variables = c("NATIVITY","ST","SCHL", "YOEP", "AGEP","PWGTP","INDP","SOCP","COW","ESR","POBP",
-#                        "POVPIP","WAGP","FINCP","HINCP","FFINCP","FHINCP","OIP")
-# hus.a.data = fread("../data/ss14pusa.csv", select = selected.variables)
-# hus.b.data = fread("../data/ss14pusb.csv", select = selected.variables)
-# db = rbind(hus.a.data, hus.b.data)
-# rm(hus.a.data, hus.b.data)
+Load data and select variables:
+selected.variables = c("NATIVITY","ST","SCHL", "YOEP", "AGEP","PWGTP","INDP","SOCP","COW","ESR","POBP",
+                       "POVPIP","WAGP","FINCP","HINCP","FFINCP","FHINCP","OIP")
+hus.a.data = fread("../data/ss14pusa.csv", select = selected.variables)
+hus.b.data = fread("../data/ss14pusb.csv", select = selected.variables)
+db = rbind(hus.a.data, hus.b.data)
+rm(hus.a.data, hus.b.data)
+
 # save(db, file = "../data/db.RData")
-load("../data/db.RData")
+# load("../data/db.RData")
 ```
 
 
