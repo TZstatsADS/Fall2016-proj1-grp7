@@ -245,13 +245,16 @@ ggplot(density_data, aes(aoa, aoa_freq, color=country)) +
 ```
 \
 We see a general trend in most groups to immigrate to the country in their twenties. There is also evidence of a smaller mode at 0-10 years of age for most distributions, which suggests that a lot of foreign-born residents entered the country as small children.
+\
 
 
+  
+### Now let's talk about education!
 \
 \
 \
-### Now, let's move on and take a look at the education level
 \
+
 ```{r echo = FALSE, message= FALSE}
 db_native = filter(db, NATIVITY == 1)
 db_foregin = filter(db, NATIVITY == 2)
@@ -291,17 +294,66 @@ for (country in top_countries$COB_name){
 #             graph_list$Guatemala, graph_list$Mexico, graph_list$`El Salvador`,
 #             graph_list$Germany, graph_list$Haiti,graph_list$Poland,nrow = 3)
 #dev.off()
-
+#Have no idea why the F** it doesn't work in R Markdown
 ```
 
 ![](../figs/Education_level.png)
 \
 \
-The graphs above are all from countries within our top 20 list. I've organized it a bit so that the first row is all Asian countries, and vast majority of Asian people in state posses a higher education degree, especially the percentage of people having a master or doctorate degree are around 20%, or even goes up to 40% like India, which is way higher than the native Americans. And as we see before, the era of Asian evasion has just began, a lot of well-educated Asian people are coming into US.
+\
+The graphs above are all from countries within our top 20 list. I've organized it a bit so that the first row is all Asian countries, and vast majority of Asian people in state posses a higher education degree, especially the percentage of people having a master or doctorate degree are around 20%, or even goes up to 40% like India, which is way higher than the native Americans. And as we see before, the era of Asian evasion has just began, a lot of well-educated Asian people are coming into US. We'll see a bit more later.
+\
 \
 The second row is countries from America, the most common education background as we see in the graph is high school level. In the third row we got Germany and Poland from Europe, the distribution is kind of similar to Asian countries with most of the people in the college level, and a larger proportion of master and doctorate degrees.
 \
+\
+```{r echo = FALSE, message = FALSE, warning=FALSE}
+top_60 = db_foregin %>% 
+                group_by(COB_name) %>%
+                summarise(sum(PWGTP)) %>%
+                arrange(desc(`sum(PWGTP)`)) %>%
+                head(60)
 
-```{r echo = FALSE}
+top_countries = top_60$COB_name
+db_top = filter(db_foregin, COB_name %in% top_countries)
+COB = character()
+avg_edu = integer()
+mode_edu = integer()
+weighted_population = numeric()
+Peak_entry = integer()
 
+for (country in top_countries){
+  temp = filter(db_top, COB_name == country)
+  
+  #calculate the mode
+  edu_dist = temp %>%
+      group_by(SCHL) %>%
+      summarise(n = sum(PWGTP)) %>%
+      arrange(desc(n))
+  
+  #peak year of immigration
+  AoE_dist = temp %>%
+      group_by(YOEP) %>%
+      summarise(n = sum(PWGTP)) %>%
+      arrange(desc(n))
+  
+  Peak_entry = c(Peak_entry, AoE_dist$YOEP[1])
+  COB = c(COB, country)
+  avg_edu = c(avg_edu, sum(temp$SCHL * temp$PWGTP / sum(temp$PWGTP), na.rm = TRUE))
+  mode_edu = c(mode_edu, edu_dist$SCHL[1])  
+  weighted_population = c(weighted_population, sum(temp$PWGTP))
+}
+rm(temp, edu_dist, db_top)
+edu_by_country = data.frame(COB = COB, avg_edu = round(avg_edu), mode_edu = mode_edu, Peak_immigration_Year = Peak_entry, weighted_population = weighted_population)
+
+#ploting
+plot_data = edu_by_country
+edu_level = c('No school completed', 'Preschool', 'Kindergarten',paste('Grade', seq(1,12)), 'High school diploma','Alternative credential', 'Some college (<1 year)','1 or more year of college credit', 'Associate degree', 'Bachelor degree', 'Master degree', 'Professional degree beyond bachelor', 'Doctorate degree')
+for (i in 1:24 ){
+  plot_data$mode_edu[plot_data$mode_edu == i] = edu_level[i]  
+}
+plot_data = slice(plot_data, 1:30)
+attach(plot_data)
+scatterD3(Peak_immigration_Year,mode_edu, col_var = COB, xlab = "Peak Immigration Year", ylab = 'Most common education Level', xlim = c(1950, 2015), size_var = weighted_population)
+detach(plot_data)
 ```
