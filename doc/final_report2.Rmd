@@ -415,7 +415,7 @@ plot_ly(income_plot[1:2000,],x=COB_name,y=WAGP,mode = "markers",color = COB_name
 
 ``` 
  \
- We can also get the each twenty country's highest wage from this command
+ We can also get each country's highest wage from this command
  ```{r load data, message=FALSE, include=FALSE}
  plot_ly(income_plot,color = COB_name,x= COB_name, y = WAGP)
 ```
