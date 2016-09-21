@@ -13,8 +13,8 @@ Term: Fall 2016
 + Project summary: Here we conduct a brief study of the foreign-born population in the United States based on the American Community Survey (ACS) published by the Census Bureau. We use the person-level data published for 2014, which includes 3,134,610 individuals. We focus on the foreign-born population, which consists of 360,677 individuals.
 
 
-#### [See report code (R notebook)](doc/final_report.Rmd)
-#### [See report html](http://www.columbia.edu/~as3171/final_report.html)
+#### [See report (web page)](http://www.columbia.edu/~as3171/final_report.html)
+#### [See code (R notebook)](doc/final_report.Rmd)
 
 **Contribution statement**: ZL, AS, JT and WZ all contributed analysis ideas for this work. AS is responsible for the list of the top 20 countries of origin, the interactive map of the US and the distributions of age, year of entry and age of arrival. ZL is responsible for the comparisons in education levels between different countries of origin, the summary table of the main statistics by country of origin, the interactive graph showing immigration peak year and education level per country, and the 'fall-behind rate' analysis. JT is responsible for the analyses on class of worker vs. country of origin, employment status vs. country of origin and industry field vs. country of origin. All team members approve our work presented in this GitHub repository including this contributions statement. 
 
