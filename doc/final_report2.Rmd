@@ -422,7 +422,71 @@ plot_ly(income_plot[1:2000,],x=COB_name,y=WAGP,mode = "markers",color = COB_name
 \
 From the above graph, we may conclude that, China, India, Korea and Canada have almost the same highest salaries. Honduras has the lowest highest wage among the top immigrants.
 
+\
+Or we can choose an easier way: just use their wage divided by 10000 to represent the relative differences between wages. And in this way can we make the interactive plot.
 
+```{r load data, message=FALSE, include=FALSE}
+#analysis about incomes; use the variable WAGP
+install.packages("plotly")
+library(plotly)
+income_plot = filter(db, NATIVITY==2 & COB_name==top_countries$COB_name)
+income_plot$WAGP=income_plot$WAGP/10000
+plot_ly(income_plot[1:2000,],x=COB_name,y=WAGP,mode = "markers",color = COB_name,size=WAGP)
+
+##highest salary
+plot_ly(income_plot,color = COB_name,x= COB_name, y = WAGP)
+```
+\
+When we want to know about the income status about the immigrants in the U.S, we chose the wage/salary income(WAGP) variable in the past year. We can divide them into nine class:
+Class 1:0 (no payment)
+Class 2: 0-20000 (0 is not included)
+Class 3:20000-40000
+Class 4: 40000-60000
+Class 5: 60000-80000
+Class 6: 80000-100000
+Class 7: 100000-150000
+Class 8: >150000
+Class 9: no record
+
+```{r load data, message=FALSE, include=FALSE}
+#analysis about incomes; use the variable WAGP
+install.packages("plotly")
+library(plotly)
+income_plot = filter(db, NATIVITY==2 & COB_name==top_countries$COB_name)
+income_plot$WAGP=income_plot$WAGP/10000
+plot_ly(income_plot[1:2000,],x=COB_name,y=WAGP,mode = "markers",color = COB_name,size=WAGP)
+
+##highest salary
+##classification
+income_plot$WAGP=income_plot$WAGP*10000
+income_plot$WAGP[income_plot$WAGP>0 & income_plot$WAGP<=20000]=1
+income_plot$WAGP[income_plot$WAGP>20000 & income_plot$WAGP<=40000]=2
+income_plot$WAGP[income_plot$WAGP>40000 & income_plot$WAGP<=60000]=3
+income_plot$WAGP[income_plot$WAGP>60000 & income_plot$WAGP<=80000]=4
+income_plot$WAGP[income_plot$WAGP>80000 & income_plot$WAGP<=100000]=5
+income_plot$WAGP[income_plot$WAGP>100000 & income_plot$WAGP<=150000]=6
+income_plot$WAGP[income_plot$WAGP>150000]=7
+no_record = vector()
+no_payment = vector()
+m = matrix(nrow = 5,ncol = 7)
+for (i in 1:5){
+  no_record[i] = sum(is.na(filter(income_plot,COB_name==select_countries[i])$WAGP))
+  matr =filter(income_plot,COB_name==select_countries[i])
+  for(j in 1:7){
+    m[i,j]=dim(filter(matr,WAGP==j))[1]
+  }
+  no_payment[i] = dim(filter(matr,WAGP==0))[1]
+}
+fin_num = cbind(no_payment,m,no_record)
+vals = matrix(t(fin_num),ncol = 1)
+spes = c(rep("Mexico",9),rep("China",9),rep("Cuba",9),rep("Canada",9),rep("Germany",9))
+cons = rep(c("no payment","0-20000","20000-40000","40000-60000","60000-80000","80000-100000","100000-150000",">150000","no record"),5)
+data_income = data.frame(spes,cons,vals)
+p <- ggplot(data_income, aes(fill=cons, y=vals, x=spes))
+p + geom_bar(stat = "identity", position="dodge") + labs(title="Income differences in different countries")
+```
+\
+From above picture, we can say that in the typical five countries, immigrants who have no payment take the most percentage. And in Mexico and China, immigrants who are only paid low money (0-20000) ranks seond.
 
 
 
