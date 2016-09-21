@@ -458,8 +458,7 @@ So it seems that drop out ratio is very similar during elementary school and mid
 My explanation would be that it's quite common here in US to go back to school and get a degree after working a few years, and having a full-time job is not an option before high school, so the drop out ratio is rather close in that period.
 \
 \
-\
-\
+
   
     
 ### Let's take a look at the employment status of the migrations in the U.S.
@@ -610,7 +609,7 @@ p+geom_bar(position = "dodge",stat = "identity")+labs(title="Industry fields rec
 \
 From this industry record graph, we know that the teenagers take the most percentage in all five countries. Mexicans also take a large percentage in finance, manufacturing as well as United Telecoms Limited industrial areas.
 
-###Now let's have a look at the immigrations' income status.
+### Now let's have a look at the immigrations' income status.
 ```{r , message=FALSE, include=FALSE, warning = FALSE}
 #analysis about incomes; use the variable WAGP(wage/salary of a year)
 ###Here is an interactive plot that will show 20 countries' immigrants' income
@@ -627,18 +626,6 @@ plot_ly(income_plot[1:2000,],x=COB_name,y=WAGP,mode = "markers",color = COB_name
 \
 From the above graph, we may conclude that, China, India, Korea and Canada have almost the same highest salaries. Honduras has the lowest highest wage among the top immigrants.
 
-\
-Or we can choose an easier way: just use their wage divided by 10000 to represent the relative differences between wages. And in this way can we make the interactive plot.
-
-```{r , message=FALSE, include=FALSE, warning = FALSE}
-#analysis about incomes; use the variable WAGP
-income_plot = filter(db, NATIVITY==2 & COB_name==top_countries$COB_name)
-income_plot$WAGP=income_plot$WAGP/10000
-plot_ly(income_plot[1:2000,],x=COB_name,y=WAGP,mode = "markers",color = COB_name,size=WAGP)
-
-##highest salary
-plot_ly(income_plot,color = COB_name,x= COB_name, y = WAGP)
-```
 \
 When we want to know about the income status about the immigrants in the U.S, we chose the wage/salary income(WAGP) variable in the past year. We can divide them into nine class:
 Class 1:0 (no payment)
