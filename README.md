@@ -6,12 +6,12 @@ Term: Fall 2016
 + Team #7
 + Projec title: Study of the foreign-born population in the United States
 + Team members
-	+ Zhehao Liu
-	+ Alex Saez
-	+ Jiani Tian
-	+ Wenjing Zhou
+	+ Zhehao Liu (Max1993Liu)
+	+ Alex Saez (alex-saez)
+	+ Jiani Tian (jianitian)
+	+ Wenjing Zhou 
 + Project summary: Here we conduct a brief study of the foreign-born population in the United States based on the American Community Survey (ACS) published by the Census Bureau. We use the person-level data published for 2014, which includes 3,134,610 individuals. We focus on the foreign-born population, which consists of 360,677 individuals.
-\
+
 
 #### [See report (R notebook)](doc/final_report.Rmd)
 
