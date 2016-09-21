@@ -9,7 +9,7 @@ Term: Fall 2016
 	+ Zhehao Liu (Max1993Liu)
 	+ Alex Saez (alex-saez)
 	+ Jiani Tian (jianitian)
-	+ Wenjing Zhou 
+	+ Wenjing Zhou (wincling)
 + Project summary: Here we conduct a brief study of the foreign-born population in the United States based on the American Community Survey (ACS) published by the Census Bureau. We use the person-level data published for 2014, which includes 3,134,610 individuals. We focus on the foreign-born population, which consists of 360,677 individuals.
 
 
