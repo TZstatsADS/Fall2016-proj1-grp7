@@ -23,10 +23,12 @@ library(DT)
 library(ggplot2)
 library(plotly)
 library(scatterD3)
+library(grid)
+library(gridExtra)
 ```
 
 
-```{r load data, message=FALSE, include=FALSE}
+```{r, message=FALSE, include=FALSE}
 # Load data and select variables:
  #selected.variables = c("ST","POBP","ENG","SCHL", "NATIVITY", "YOEP", "AGEP", "PWGTP")
  #hus.a.data = fread("../data/ss14pusa.csv", select = selected.variables)
@@ -249,29 +251,230 @@ ggplot(density_data, aes(aoa, aoa_freq, color=country)) +
 \
 We see a general trend in most groups to immigrate to the country in their twenties. There is also evidence of a smaller mode at 0-10 years of age for most distributions, which suggests that a lot of foreign-born residents entered the country as small children.
 
-
-### Now, let's move on and take a look at the education level
+\
+\
+\
+  
+    
+### Now let's talk about education!
+\
+\
 \
 
+```{r echo = FALSE, message= FALSE}
+db_native = filter(db, NATIVITY == 1)
+db_foregin = filter(db, NATIVITY == 2)
+db_foregin = mutate(db_foregin, Age_of_Entry = AGEP - (2014 - YOEP))
 
+#break education level into groups
+db_foregin = mutate(db_foregin, edu_level = cut(db_foregin$SCHL, breaks = c(1,3,7,11,16,21,24), labels = c('No school', 'Elementary school','Middle school','High school','College','Beyond'),include.lowest = T ))
 
+db_native = mutate(db_native, edu_level = cut(db_native$SCHL, breaks = c(1,3,7,11,16,21,24), labels = c('No school', 'Elementary school','Middle school','High school','College','Beyond'),include.lowest = T ))
+
+db_native = filter(db_native, !is.na(edu_level))
+#showing the distribution of the education level of native Americans
+ggplot(db_native, aes(edu_level)) + geom_bar(aes(weights = PWGTP/sum(PWGTP)), position = 'dodge') + scale_x_discrete() + 
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + labs(title = 'Native American', x = 'Education Level', y = 'Freq') 
+```
 \
-###Let's take a look at the employment status of the migrations in the U.S.
+\
+\
+So as we can see here,most of the native Americans have went to college or have an associate degree or other certifications. And people who have went to high school and college add up to around 70 percent of the population. So let's see what's the scenario for other countries.
+\
+\
+```{r echo = FALSE}
+#temporary dataset with only top 20 countries
+top_db = filter(db_foregin, (COB_name %in% top_countries$COB_name) & !is.na(edu_level))
+
+#store education level dist figure in a list
+graph_list = list()
+
+for (country in top_countries$COB_name){
+  temp = filter(top_db, COB_name == country)
+  graph_list[[country]] = ggplot(temp, aes(edu_level)) + geom_bar(aes(weights = PWGTP/sum(PWGTP)), position = 'dodge') + scale_x_discrete() + 
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + labs(title = country, x = 'Education Level', y = 'Freq') 
+}
+
+#png(filename = "../figs/Education_level.png")
+#grid.arrange(graph_list$India, graph_list$China, graph_list$Korea,
+#             graph_list$Guatemala, graph_list$Mexico, graph_list$`El Salvador`,
+#             graph_list$Germany, graph_list$Haiti,graph_list$Poland,nrow = 3)
+#dev.off()
+#Have no idea why the F** it doesn't work in R Markdown
+```
+
+![](../figs/Education_level.png)
+\
+\
+\
+The graphs above are all from countries within our top 20 list. I've organized it a bit so that the first row is all Asian countries, and vast majority of Asian people in state posses a higher education degree, especially the percentage of people having a master or doctorate degree are around 20%, or even goes up to 40% like India, which is way higher than the native Americans. And as we see before, the era of Asian immigration has just began, a lot of well-educated Asian people are coming into US. We'll see a bit more later.
+\
+\
+The second row is countries from America, the most common education background as we see in the graph is high school level. In the third row we got Germany and Poland from Europe, the distribution is kind of similar to Asian countries with most of the people in the college level, and a larger proportion of master and doctorate degrees.
+\
+\
+```{r echo = FALSE, message = FALSE, warning=FALSE}
+top_60 = db_foregin %>% 
+                group_by(COB_name) %>%
+                summarise(sum(PWGTP)) %>%
+                arrange(desc(`sum(PWGTP)`)) %>%
+                head(60)
+
+top_countries = top_60$COB_name
+db_top = filter(db_foregin, COB_name %in% top_countries)
+COB = character()
+avg_edu = integer()
+mode_edu = integer()
+weighted_population = numeric()
+Peak_entry = integer()
+mode_age = integer()
+
+for (country in top_countries){
+  temp = filter(db_top, COB_name == country)
+  
+  #calculate the mode
+  edu_dist = temp %>%
+      group_by(SCHL) %>%
+      summarise(n = sum(PWGTP)) %>%
+      arrange(desc(n))
+  
+  #peak year of immigration
+  AoE_dist = temp %>%
+      group_by(YOEP) %>%
+      summarise(n = sum(PWGTP)) %>%
+      arrange(desc(n))
+  
+  #calculate the mode age
+  age_dist = temp %>% 
+      group_by(Age_of_Entry) %>%
+      summarise(n = sum(PWGTP)) %>%
+      arrange(desc(n))
+  
+  Peak_entry = c(Peak_entry, AoE_dist$YOEP[1])
+  COB = c(COB, country)
+  avg_edu = c(avg_edu, sum(temp$SCHL * temp$PWGTP / sum(temp$PWGTP), na.rm = TRUE))
+  mode_edu = c(mode_edu, edu_dist$SCHL[1])  
+  mode_age = c(mode_age, age_dist$Age_of_Entry[1])
+  weighted_population = c(weighted_population, sum(temp$PWGTP))
+}
+rm(temp, edu_dist, db_top)
+edu_by_country = data.frame(COB = COB,  mode_edu = mode_edu, Peak_immigration_Year = Peak_entry, weighted_population = weighted_population, mode_age = mode_age)
+datatable(edu_by_country, options = list(searching = FALSE))
+```
+\
+\
+\
+
+```{r echo = FALSE, message= FALSE, warning= FALSE}
+#ploting
+plot_data = edu_by_country
+edu_level = c('No school completed', 'Preschool', 'Kindergarten',paste('Grade', seq(1,12)), 'High school diploma','Alternative credential', 'Some college (<1 year)','1 or more year of college credit', 'Associate degree', 'Bachelor degree', 'Master degree', 'Professional degree beyond bachelor', 'Doctorate degree')
+for (i in 1:24 ){
+  plot_data$mode_edu[plot_data$mode_edu == i] = edu_level[i]  
+}
+plot_data = slice(plot_data, 1:30)
+
+attach(plot_data)
+scatterD3(Peak_immigration_Year,mode_edu, col_var = COB, xlab = "Peak Immigration Year", ylab = 'Most common education Level', xlim = c(1950, 2015), size_var = weighted_population)
+detach(plot_data)
+```
+\
+In the upper right corner are the countries with more recent immigration peak and higher education level, which as we expect to have lots of Asian countries. It corresponds to the prior analysis that it's the era of Asian immigration has just started :)
+\
+\
+    
+'We hold these truths to be self-evident, that all men are created equal.' -Thomas Jefferson 
+  
+### So do people from foreign countries really have an equal chance in getting education?
+\
+\
+We took a look at the overall distribution of education level for foreign kid in United states.  
+'Foreign kid' here are defined as those who came to US before age 6, the time when most native American kids start elementary school.
+\
+\
+``` {r echo = FALSE, warning = FALSE}
+#find the age of a native American kid start school
+age_dist = db_native %>% 
+  filter(SCHL == 4) %>%
+  group_by(AGEP) %>%
+  summarise(n = n()) %>%
+  arrange(desc(n))
+staring_age_elementary = age_dist$AGEP[1] 
+#most of the American kids start elementary school at age 6
+
+#dataset of immigrants who come to US at age under 6
+db_foregin_kid = filter(db_foregin, Age_of_Entry < 6)
+#overall picture of foreign kid in US
+db_foregin_kid = mutate(db_foregin_kid, edu_level = cut(db_foregin_kid$SCHL, breaks = c(1,3,7,11,16,21,24), labels = c('No school', 'Elementary school','Middle school','High school','College','Beyond'),include.lowest = T ))
+db_foregin_kid = filter(db_foregin_kid, !is.na(db_foregin_kid$SCHL))
+
+ggplot(db_foregin_kid, aes(edu_level)) + geom_bar(aes(weights = PWGTP/sum(PWGTP)), position = 'dodge') + scale_x_discrete() + 
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + labs(title = 'Foregin kid in US', x = 'Education Level', y = 'Freq') 
+```
+\
+\
+It looks pretty similar to the distribution of native American's education level that we've shown before, but with a bit higher proportion in middle school and a bit lower in college, which is reasonable since a lot of young kids came to the states during the big wave of immigration around year 2000 - 2005, and by now they should have a middel school degree.
+\
+\
+\
+Here we define another variable, the 'drop out ratio'
+Going to school especially elementary and middle school is very much like climbing a ladder. For example at age 6, you started with Grade 1, and most of the times you'll be in Grade 2 at age 7.
+We define dropout as being a certain amount of years behind this 'shedule', in the extreme case, a 50 year old person whose education record is elementary school, we strongly believe that he has dropped out, and the drop out ratio would be the number of dropped out people divided by the population at the same education level
+Here we choose the amount of years to be 2, in consider for any gap year or later enrollment, then compare the drop out ratio between native and foregin kids.
+\
+\
+\
+```{r echo = FALSE, warning = FALSE}
+drop_out_rate <- function(data, lag = 2, edu = 4){
+  age_dist = data %>% 
+    filter(SCHL == edu) %>%
+    group_by(AGEP) %>%
+    summarise(n = n()) %>%
+    arrange(desc(n))
+    most_common_age = age_dist$AGEP[1]
+  population = sum(age_dist$n, na.rm = T)
+  age_dist = filter(age_dist, AGEP > most_common_age + lag)
+  over_age_population = sum(age_dist$n, na.rm = T)
+  return (over_age_population/population)
+}
+
+native_dropout_rate = numeric()
+foreign_dropout_rate = numeric()
+for (edu in seq(4,14)){
+   native_dropout_rate = c(native_dropout_rate, drop_out_rate(db_native,3,edu))
+   foreign_dropout_rate= c(foreign_dropout_rate, drop_out_rate(db_foregin_kid,2,edu))
+}
+dropout_comparison = data.frame(edu_level = rep(seq(4,14),2), drop_out_rate = c(native_dropout_rate, foreign_dropout_rate), indicator = c(rep('native',11,),rep('foreign',11)))
+
+ggplot(dropout_comparison, aes(x = edu_level, y = drop_out_rate, color = indicator)) + geom_path() + theme_bw() + labs(x = 'Education Level', y = 'Dropout rate', title = 'Dropout rate comparison') + scale_x_discrete(limits = c(6,9,12,14),labels = c('Grade 4', 'Grade 7','Grade 10', 'Grade 12'))
+```
+\
+\
+\
+So it seems that drop out ratio is very similar during elementary school and middle school, but when going to high school the drop out rate went sky high for native American.
+My explanation would be that it's quite common here in US to go back to school and get a degree after working a few years, and having a full-time job is not an option before high school, so the drop out ratio is rather close in that period.
+\
+\
+\
+\
+  
+    
+### Let's take a look at the employment status of the migrations in the U.S.
 Firstly to choose the varaibles we are intersted in: 
 
 \
 After comparing several similiar variables, we chose Class of Worker(COW),Employment Status Record(ESR) and Industry Field Record (INDP) as three attributes to evalute the employment situations of the immigrants in the U.S.
 \
-```{r, echo=FALSE}
+```{r, echo=FALSE, include = FALSE, warning = FALSE}
 #Load data and select variables:
 selected.variables = c("ST","SCHL", "NATIVITY","PWGTP","INDP","SOCP","COW","ESR","POBP","POVPIP","WAGP","FINCP","HINCP","FFINCP","FHINCP","OIP")
-hus.a.data = fread("~/Desktop/ss14pusa.csv", select = selected.variables)
-hus.b.data = fread("~/Desktop/ss14pusb.csv", select = selected.variables)
+hus.a.data = fread("../data/ss14pusa.csv", select = selected.variables)
+hus.b.data = fread("../data/ss14pusb.csv", select = selected.variables)
 db = rbind(hus.a.data, hus.b.data)
 rm(hus.a.data, hus.b.data)
 
 # Get country names and add to db:
-countries = fread("~/Desktop/countrynames.csv")
+countries = fread("../data/countrynames.csv")
 db = db %>%
   left_join(., countries, by = c("POBP" = "code")) %>%
   mutate(COB_name = name) %>%
@@ -291,17 +494,18 @@ top_countries = db %>%
   summarise(sum(PWGTP)) %>%
   arrange(desc(`sum(PWGTP)`)) %>%
   head(top_n)
-  
+
 ```
 \
  From the above picture, we can see that these are the top 20 countries migrant to the U.S. I picked Mexico, China, Cuba, Canada and Germany. As they are in South America, Asia, Middle America, North America and Europe, I think these five countries are representative. So I chose them as the our goals.
  
- ```{r, echo=FALSE}
+```{r, echo = FALSE}
 select_countries = c('Mexico','China', 'Cuba', 'Canada', 'Germany') # top_countries$COB_name
 plot_data = filter(db, NATIVITY==2 & COB_name %in% select_countries)
+```
 
- ```
- ```{r, echo=FALSE}
+
+```{r, echo=FALSE}
  #bar chart about class of worker in the typical countries, use the variable COW
 species = c(rep("Mexico",10),rep("China",10),rep("Cuba",10),rep("Canada",10),rep("Germany",10))
 conditions = rep(c("for wages","none-profit","local government","state government","fedral government","Self-employed in own not incorporated","Self-employed in own incorporated","Working without pay(family business or farm)","unemployed","less than 16"),5)
@@ -397,18 +601,16 @@ total_num_val = matrix(t(total_num_mat),nrow = 1,byrow = TRUE)
 species_INDP = c(rep("Mexico",20),rep("China",20),rep("Cuba",20),rep("Canada",20),rep("Germany",20))
 conditions_INDP = rep(c("under 16","AGR","EXT","UTL","CON","MFG","WHL","RET","TRN","INF","FIN","PRF","EDU","MED","SCA","ENT","SRV","ADM","MIL","UNEMPLYED"),5)
 data_INDP = data.frame(species_INDP,conditions_INDP,total_num_val)
-p<-ggplot(data_INDP,aes(fill=conditions_INDP,y=total_num_val,x=species_INDP))
-p+geom_bar(position = "dodge",stat = "identity")+labs(title="Industry fields record in different countries")
+#p<-ggplot(data_INDP,aes(fill=conditions_INDP,y=total_num_val,x=species_INDP))
+#p+geom_bar(position = "dodge",stat = "identity")+labs(title="Industry fields #record in different countries")
 ```
 \
 From this industry record graph, we know that the teenagers take the most percentage in all five countries. Mexicans also take a large percentage in finance, manufacturing as well as United Telecoms Limited industrial areas.
 
 ###Now let's have a look at the immigrations' income status.
-```{r load data, message=FALSE, include=FALSE}
+```{r , message=FALSE, include=FALSE, warning = FALSE}
 #analysis about incomes; use the variable WAGP(wage/salary of a year)
 ###Here is an interactive plot that will show 20 countries' immigrants' income
-install.packages("plotly")
-library(plotly)
 income_plot = filter(db, NATIVITY==2 & COB_name==top_countries$COB_name)
 income_plot$WAGP=income_plot$WAGP/10000
 plot_ly(income_plot[1:2000,],x=COB_name,y=WAGP,mode = "markers",color = COB_name,size=WAGP)
@@ -416,7 +618,7 @@ plot_ly(income_plot[1:2000,],x=COB_name,y=WAGP,mode = "markers",color = COB_name
 ``` 
  \
  We can also get each country's highest wage from this command
- ```{r load data, message=FALSE, include=FALSE}
+```{r , message=FALSE, include=FALSE}
  plot_ly(income_plot,color = COB_name,x= COB_name, y = WAGP)
 ```
 \
@@ -425,10 +627,8 @@ From the above graph, we may conclude that, China, India, Korea and Canada have 
 \
 Or we can choose an easier way: just use their wage divided by 10000 to represent the relative differences between wages. And in this way can we make the interactive plot.
 
-```{r load data, message=FALSE, include=FALSE}
+```{r , message=FALSE, include=FALSE, warning = FALSE}
 #analysis about incomes; use the variable WAGP
-install.packages("plotly")
-library(plotly)
 income_plot = filter(db, NATIVITY==2 & COB_name==top_countries$COB_name)
 income_plot$WAGP=income_plot$WAGP/10000
 plot_ly(income_plot[1:2000,],x=COB_name,y=WAGP,mode = "markers",color = COB_name,size=WAGP)
@@ -448,10 +648,8 @@ Class 7: 100000-150000
 Class 8: >150000
 Class 9: no record
 
-```{r load data, message=FALSE, include=FALSE}
+```{r , message=FALSE, include=FALSE, warning = FALSE}
 #analysis about incomes; use the variable WAGP
-install.packages("plotly")
-library(plotly)
 income_plot = filter(db, NATIVITY==2 & COB_name==top_countries$COB_name)
 income_plot$WAGP=income_plot$WAGP/10000
 plot_ly(income_plot[1:2000,],x=COB_name,y=WAGP,mode = "markers",color = COB_name,size=WAGP)
