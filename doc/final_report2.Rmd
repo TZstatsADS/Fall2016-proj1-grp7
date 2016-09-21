@@ -404,8 +404,24 @@ p+geom_bar(position = "dodge",stat = "identity")+labs(title="Industry fields rec
 From this industry record graph, we know that the teenagers take the most percentage in all five countries. Mexicans also take a large percentage in finance, manufacturing as well as United Telecoms Limited industrial areas.
 
 ###Now let's have a look at the immigrations' income status.
- 
- 
+```{r load data, message=FALSE, include=FALSE}
+#analysis about incomes; use the variable WAGP(wage/salary of a year)
+###Here is an interactive plot that will show 20 countries' immigrants' income
+install.packages("plotly")
+library(plotly)
+income_plot = filter(db, NATIVITY==2 & COB_name==top_countries$COB_name)
+income_plot$WAGP=income_plot$WAGP/10000
+plot_ly(income_plot[1:2000,],x=COB_name,y=WAGP,mode = "markers",color = COB_name,size=WAGP)
+
+``` 
+ \
+ We can also get the each twenty country's highest wage from this command
+ ```{r load data, message=FALSE, include=FALSE}
+ plot_ly(income_plot,color = COB_name,x= COB_name, y = WAGP)
+```
+\
+From the above graph, we may conclude that, China, India, Korea and Canada have almost the same highest salaries. Honduras has the lowest highest wage among the top immigrants.
+
 
 
 
