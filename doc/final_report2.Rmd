@@ -343,7 +343,7 @@ p + geom_bar(position="dodge", stat="identity") + labs(title='Employment Status 
 ```
 
 \
-As we can see from the employment status recode graph, Mexican people surplus other countries of the total immigrants to the U.S. The civilian employed at work and not in labor force also take a large percentage. Chins ranks second and the other three countries all have the similar patterns, showing that people who are civilian employed and at work and not in labor force are the main status of the migrants in the U.S.
+As we can see from the employment status recode graph, Mexican people surplus other countries of the total immigrants to the U.S. The civilian employed at work and not in labor force also take a large percentage. China ranks second and the other three countries all have the similar patterns, showing that people who are civilian employed and at work and not in labor force are the main status of the migrants in the U.S.
 
 ```{r, echo=FALSE}
 #bar chart about Industry recode using the variable INDP
