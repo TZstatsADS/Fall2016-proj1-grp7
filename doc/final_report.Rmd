@@ -374,4 +374,69 @@ detach(plot_data)
 ```
 \
 \
+\
+    
+'We hold these truths to be self-evident, that all men are created equal.' -Thomas Jefferson 
+  
+### So do people from foreign countries really have an equal chance in getting education?
+\
+\
+We took a look at the overall distribution of education level for foreign kid in United states.  
+'Foreign kid' here are defined as those who came to US before age 6, the time when most native American kids start elementary school.
+\
+\
+``` {r echo = FALSE, warning = FALSE}
+#find the age of a native American kid start school
+age_dist = db_native %>% 
+  filter(SCHL == 4) %>%
+  group_by(AGEP) %>%
+  summarise(n = n()) %>%
+  arrange(desc(n))
+staring_age_elementary = age_dist$AGEP[1] 
+#most of the American kids start elementary school at age 6
 
+#dataset of immigrants who come to US at age under 6
+db_foregin_kid = filter(db_foregin, Age_of_Entry < 6)
+#overall picture of foreign kid in US
+db_foregin_kid = mutate(db_foregin_kid, edu_level = cut(db_foregin_kid$SCHL, breaks = c(1,3,7,11,16,21,24), labels = c('No school', 'Elementary school','Middle school','High school','College','Beyond'),include.lowest = T ))
+db_foregin_kid = filter(db_foregin_kid, !is.na(db_foregin_kid$SCHL))
+
+ggplot(db_foregin_kid, aes(edu_level)) + geom_bar(aes(weights = PWGTP/sum(PWGTP)), position = 'dodge') + scale_x_discrete() + 
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + labs(title = 'Foregin kid in US', x = 'Education Level', y = 'Freq') 
+```
+\
+\
+It looks pretty similar to the distribution of native American's education level that we've shown before, but with a bit higher proportion in middle school and a bit lower in college, which is reasonable since a lot of young kids came to the states during the big wave of immigration around year 2000 - 2005, and by now they should have a middel school degree.
+\
+\
+\
+Here we check out the 
+
+
+\
+\
+\
+```{r echo = FALSE, warning = FALSE}
+drop_out_rate <- function(data, lag = 2, edu = 4){
+  age_dist = data %>% 
+    filter(SCHL == edu) %>%
+    group_by(AGEP) %>%
+    summarise(n = n()) %>%
+    arrange(desc(n))
+    most_common_age = age_dist$AGEP[1]
+  population = sum(age_dist$n, na.rm = T)
+  age_dist = filter(age_dist, AGEP > most_common_age + lag)
+  over_age_population = sum(age_dist$n, na.rm = T)
+  return (over_age_population/population)
+}
+
+native_dropout_rate = numeric()
+foreign_dropout_rate = numeric()
+for (edu in seq(4,14)){
+   native_dropout_rate = c(native_dropout_rate, drop_out_rate(db_native,3,edu))
+   foreign_dropout_rate= c(foreign_dropout_rate, drop_out_rate(db_foregin_kid,2,edu))
+}
+dropout_comparison = data.frame(edu_level = rep(seq(4,14),3), drop_out_rate = c(native_dropout_rate, foreign_dropout_rate), indicator = c(rep('native',11,),rep('foreign',11)))
+
+ggplot(dropout_comparison, aes(x = edu_level, y = drop_out_rate, color = indicator)) + geom_path() + theme_bw() + labs(x = 'Education Level', y = 'Dropout rate', title = 'Dropout rate comparison') + scale_x_discrete(limits = c(6,9,12,14),labels = c('Grade 4', 'Grade 7','Grade 10', 'Grade 12'))
+```
