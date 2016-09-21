@@ -321,6 +321,7 @@ avg_edu = integer()
 mode_edu = integer()
 weighted_population = numeric()
 Peak_entry = integer()
+mode_age = integer()
 
 for (country in top_countries){
   temp = filter(db_top, COB_name == country)
@@ -337,15 +338,28 @@ for (country in top_countries){
       summarise(n = sum(PWGTP)) %>%
       arrange(desc(n))
   
+  #calculate the mode age
+  age_dist = temp %>% 
+      group_by(Age_of_Entry) %>%
+      summarise(n = sum(PWGTP)) %>%
+      arrange(desc(n))
+  
   Peak_entry = c(Peak_entry, AoE_dist$YOEP[1])
   COB = c(COB, country)
   avg_edu = c(avg_edu, sum(temp$SCHL * temp$PWGTP / sum(temp$PWGTP), na.rm = TRUE))
   mode_edu = c(mode_edu, edu_dist$SCHL[1])  
+  mode_age = c(mode_age, age_dist$Age_of_Entry[1])
   weighted_population = c(weighted_population, sum(temp$PWGTP))
 }
 rm(temp, edu_dist, db_top)
-edu_by_country = data.frame(COB = COB, avg_edu = round(avg_edu), mode_edu = mode_edu, Peak_immigration_Year = Peak_entry, weighted_population = weighted_population)
+edu_by_country = data.frame(COB = COB,  mode_edu = mode_edu, Peak_immigration_Year = Peak_entry, weighted_population = weighted_population, mode_age = mode_age)
+datatable(edu_by_country, options = list(searching = FALSE))
+```
+\
+\
+\
 
+```{r echo = FALSE, message= FALSE, warning= FALSE}
 #ploting
 plot_data = edu_by_country
 edu_level = c('No school completed', 'Preschool', 'Kindergarten',paste('Grade', seq(1,12)), 'High school diploma','Alternative credential', 'Some college (<1 year)','1 or more year of college credit', 'Associate degree', 'Bachelor degree', 'Master degree', 'Professional degree beyond bachelor', 'Doctorate degree')
@@ -353,7 +367,11 @@ for (i in 1:24 ){
   plot_data$mode_edu[plot_data$mode_edu == i] = edu_level[i]  
 }
 plot_data = slice(plot_data, 1:30)
+
 attach(plot_data)
 scatterD3(Peak_immigration_Year,mode_edu, col_var = COB, xlab = "Peak Immigration Year", ylab = 'Most common education Level', xlim = c(1950, 2015), size_var = weighted_population)
 detach(plot_data)
 ```
+\
+\
+
