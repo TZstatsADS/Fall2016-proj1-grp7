@@ -199,11 +199,6 @@ for (country in top_countries){
       summarise(n = sum(PWGTP)) %>%
       arrange(desc(n))
   
-  Peak_entry = c(Peak_entry, AoE_dist$YOEP[1])
-  COB = c(COB, country)
-  avg_edu = c(avg_edu, sum(temp$SCHL * temp$PWGTP / sum(temp$PWGTP), na.rm = TRUE))
-  mode_edu = c(mode_edu, edu_dist$SCHL[1])  
-  weighted_population = c(weighted_population, sum(temp$PWGTP))
 }
 rm(temp, edu_dist, db_top)
 edu_by_country = data.frame(COB = COB, mode_edu = mode_edu, Peak_immigration_Year = Peak_entry, weighted_population = weighted_population)
