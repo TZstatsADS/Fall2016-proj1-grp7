@@ -97,7 +97,15 @@ for(country in select_countries){
   yoes = c(yoes, dens_c[[1]])
   yoe_freqs = c(yoe_freqs, dens_c[[2]])
   
+<<<<<<< HEAD
 
+=======
+  # weighed density age at entry
+  dens_c = with(plot_data_c, density(AGEP-(2013-YOEP), weights=PWGTP/sum(PWGTP), bw=3, n=100, from=-10, to=100))
+  aoas = c(aoas, dens_c[[1]])
+  aoa_freqs = c(aoa_freqs, dens_c[[2]])
+  
+>>>>>>> origin/master
   countries = c(countries, rep(country,100))
 }
 
