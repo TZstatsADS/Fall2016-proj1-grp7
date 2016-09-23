@@ -21,13 +21,13 @@ library(scatterD3)
 
 ```{r load data, message=FALSE, include=FALSE}
  # Load data and select variables:
- selected.variables = c("ST","POBP","ENG","SCHL", "NATIVITY", "YOEP", "AGEP", "PWGTP")
- hus.a.data = fread("../data/ss14pusa.csv", select = selected.variables)
- hus.b.data = fread("../data/ss14pusb.csv", select = selected.variables)
- db = rbind(hus.a.data, hus.b.data)
- rm(hus.a.data, hus.b.data)
+ # selected.variables = c("ST","POBP","ENG","SCHL", "NATIVITY", "YOEP", "AGEP", "PWGTP")
+ # hus.a.data = fread("../data/ss14pusa.csv", select = selected.variables)
+ # hus.b.data = fread("../data/ss14pusb.csv", select = selected.variables)
+ # db = rbind(hus.a.data, hus.b.data)
+ # rm(hus.a.data, hus.b.data)
 
-# load("../data/db.RData")
+load("../data/db.RData")
 
 ```
 
@@ -64,7 +64,7 @@ top_countries = db %>%
 ```{r, message=FALSE, include=FALSE}
 # Compute weighed densities of Age, Year of Entry, and Age at Entry for different immigrant groups. Weighing is done using survey weights PWGTP
 
-select_countries = c('Mexico', 'China', 'Cuba', 'India', 'Germany') # top_countries$COB_name
+select_countries =  top_countries$COB_name # c('Mexico', 'China', 'Cuba', 'India', 'Germany') #
 plot_data = filter(db, NATIVITY==2 & COB_name %in% select_countries)
 
 ages = integer()
