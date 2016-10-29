@@ -14,6 +14,9 @@ output:
 library(dplyr)
 library(data.table)
 library(ggplot2)
+library(DT)
+library(plotly)
+library(scatterD3)
 ```
 
 ```{r load data, message=FALSE, include=FALSE}
@@ -156,8 +159,70 @@ ggplot(density_data, aes(aoa, aoa_freq, color=country)) +
 We see a general trend in most groups to immigrate to the country in their twenties. There is also evidence of a smaller mode at 0-10 years of age for most distributions, which suggests that a lot of foreign-born residents entered the country as small children.
 
 \
-Now let get to Education
+Weighted Average education levels
+```{r echo = FALSE}
+#Among the top 20 immigrant countries, who has a higher education level
+#Explorative analysis on education level
+
+#adding age of entry into the dataset
+db = mutate(db, Age_of_Entry = AGEP-(2014-YOEP))
+db_native = filter(db, NATIVITY == 1)
+db_foregin = filter(db, NATIVITY == 2)
+
+top_60 = db_foregin %>% 
+                group_by(COB_name) %>%
+                summarise(sum(PWGTP)) %>%
+                arrange(desc(`sum(PWGTP)`)) %>%
+                head(60)
+
+top_countries = top_60$COB_name
+db_top = filter(db_foregin, COB_name %in% top_countries)
+COB = character()
+avg_edu = integer()
+mode_edu = integer()
+weighted_population = numeric()
+Peak_entry = integer()
+
+filter(db_foregin, COB_name == 'Laos')
+for (country in top_countries){
+  temp = filter(db_top, COB_name == country)
+  
+  #calculate the mode
+  edu_dist = temp %>%
+      group_by(SCHL) %>%
+      summarise(n = sum(PWGTP)) %>%
+      arrange(desc(n))
+  
+  #peak year of immigration
+  AoE_dist = temp %>%
+      group_by(YOEP) %>%
+      summarise(n = sum(PWGTP)) %>%
+      arrange(desc(n))
+  
+  Peak_entry = c(Peak_entry, AoE_dist$YOEP[1])
+  COB = c(COB, country)
+  avg_edu = c(avg_edu, sum(temp$SCHL * temp$PWGTP / sum(temp$PWGTP), na.rm = TRUE))
+  mode_edu = c(mode_edu, edu_dist$SCHL[1])  
+  weighted_population = c(weighted_population, sum(temp$PWGTP))
+}
+rm(temp, edu_dist, db_top)
+edu_by_country = data.frame(COB = COB, mode_edu = mode_edu, Peak_immigration_Year = Peak_entry, weighted_population = weighted_population)
+
+#arrange(edu_by_country, desc(weighted_population))
+ggplot(edu_by_country[1:20,], aes(x = Peak_immigration_Year, y = mode_edu, color = COB)) + geom_point() + geom_jitter() + theme_bw() 
+
+scatterD3(edu_by_country$Peak_immigration_Year[1:20],edu_by_country$mode_edu[1:20], col_var = edu_by_country$COB[1:20])
+
+```
+
+What? Am I blind? Most of the Laos immigrant haven't been to school? What happend?
+
+```{r include=FALSE}
+print
+```
+
 ```{r echo = False}
+#distribution of education level
 ggplot(density_data, aes(edu, edu_freqs, color=country)) + 
   geom_line() +
   theme_bw() + 
